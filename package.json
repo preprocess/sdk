@@ -16,8 +16,8 @@
   },
   "scripts": {
     "build": "tsc -p tsconfig.build.json",
-    "check": "tsc --noEmit",
-    "test": "pnpm build && node --test"
+    "check": "tsc --noEmit && tsc -p test/tsconfig.json",
+    "test": "pnpm build && node --test 'test/*.test.js'"
   },
   "devDependencies": {
     "typescript": "7.0.2"
@@ -27,4 +27,3 @@
   },
   "packageManager": "pnpm@10.14.0"
 }
-
