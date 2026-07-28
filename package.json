@@ -30,7 +30,7 @@
     "registry": "https://registry.npmjs.org/"
   },
   "scripts": {
-    "build": "node test/clean-dist.js && tsc -p tsconfig.build.json --declarationMap false --sourceMap false",
+    "build": "node test/clean-dist.js && tsc -p tsconfig.build.json",
     "check": "tsc --noEmit && tsc -p test/tsconfig.json",
     "test": "pnpm build && node --test 'test/*.test.js'",
     "verify:package": "pnpm build && node test/release-package.js"
