@@ -1,0 +1,101 @@
+name: Publish to GitHub Packages
+
+on:
+  workflow_dispatch:
+    inputs:
+      commit:
+        description: Full main-branch commit SHA to mirror
+        required: true
+        type: string
+  push:
+    tags:
+      - "v*.*.*"
+
+permissions: {}
+
+concurrency:
+  group: github-packages-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  publish:
+    if: github.repository == 'preprocess/sdk'
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    permissions:
+      contents: read
+      packages: write
+    env:
+      RELEASE_SHA: ${{ github.event_name == 'workflow_dispatch' && inputs.commit || github.sha }}
+    steps:
+      - name: Validate immutable release input
+        run: |
+          if ! [[ "$RELEASE_SHA" =~ ^[0-9a-f]{40}$ ]]; then
+            echo "commit must be one full lowercase Git SHA" >&2
+            exit 1
+          fi
+
+      - name: Check out immutable release input
+        uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+        with:
+          ref: ${{ env.RELEASE_SHA }}
+          fetch-depth: 0
+          persist-credentials: false
+
+      - name: Require dispatch commits on main or tags matching the package
+        env:
+          EVENT_NAME: ${{ github.event_name }}
+          RELEASE_TAG: ${{ github.ref_name }}
+        run: |
+          test "$(git rev-parse HEAD)" = "$RELEASE_SHA"
+          if [[ "$EVENT_NAME" == "workflow_dispatch" ]]; then
+            git fetch --no-tags origin main
+            git merge-base --is-ancestor "$RELEASE_SHA" origin/main
+          else
+            node -e 'const manifest = require("./package.json"); if (process.env.RELEASE_TAG !== `v${manifest.version}`) throw new Error("tag does not match package version")'
+          fi
+
+      - name: Install pnpm
+        uses: pnpm/action-setup@b906affcce14559ad1aafd4ab0e942779e9f58b1 # v4
+        with:
+          version: 10.14.0
+          run_install: false
+
+      - name: Install Node.js for GitHub Packages
+        uses: actions/setup-node@249970729cb0ef3589644e2896645e5dc5ba9c38 # v6
+        with:
+          node-version: 24
+          registry-url: https://npm.pkg.github.com
+          scope: "@preprocess"
+          package-manager-cache: false
+
+      - name: Install frozen dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Verify public package
+        run: |
+          pnpm check
+          pnpm test
+          pnpm build
+          mkdir -p release
+          npm pack --json --pack-destination release > release/npm-pack.json
+          tarball="release/$(node -p 'JSON.parse(require("fs").readFileSync("release/npm-pack.json", "utf8"))[0].filename')"
+          node test/release-package.js "$tarball"
+          echo "RELEASE_TARBALL=$tarball" >> "$GITHUB_ENV"
+
+      - name: Publish exact artifact to GitHub Packages
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          npm publish "$RELEASE_TARBALL" \
+            --registry=https://npm.pkg.github.com \
+            --provenance=false
+
+      - name: Retain mirror evidence
+        if: always()
+        uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6
+        with:
+          name: github-packages-${{ env.RELEASE_SHA }}
+          path: release/
+          if-no-files-found: error
+          retention-days: 90
