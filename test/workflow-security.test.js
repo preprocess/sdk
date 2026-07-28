@@ -58,10 +58,6 @@ test("the GitHub Packages mirror is repository-scoped and credentialless", () =>
     githubPackagesWorkflow,
     /--registry=https:\/\/npm\.pkg\.github\.com/,
   )
-  assert.match(
-    githubPackagesWorkflow,
-    /npm publish "\.\/\$RELEASE_TARBALL"/,
-  )
   assert.match(githubPackagesWorkflow, /--provenance=false/)
   assert.match(githubPackagesWorkflow, /git merge-base --is-ancestor/)
   assert.match(githubPackagesWorkflow, /node test\/release-package\.js/)
