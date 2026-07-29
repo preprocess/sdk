@@ -24,7 +24,7 @@ test("defineProcess records identity, compatibility, capabilities, and entrypoin
   const process = defineProcess({
     projectKey: "fabrication-orders",
     name: "Fabrication order intake",
-    sdk: "^1.0.0",
+    sdk: "^0.0.0",
     compatibility: { packageFormat: "^1", runtime: "^1" },
     capabilities: {
       outbound: {

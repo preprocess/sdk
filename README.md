@@ -3,7 +3,7 @@
 Public TypeScript contracts for authoring versioned Preprocess Processes.
 
 ```sh
-npm install @preprocess/sdk@^1.0.0
+npm install @preprocess/sdk@^0.0.0
 ```
 
 The package deliberately stays small. A Process declares stable identity,
@@ -25,7 +25,7 @@ import {
 export default defineProcess({
   projectKey: "fabrication-orders",
   name: "Fabrication order intake",
-  sdk: "^1.0.0",
+  sdk: "^0.0.0",
   compatibility: { packageFormat: "^1", runtime: "^1" },
   capabilities: {
     outbound: {

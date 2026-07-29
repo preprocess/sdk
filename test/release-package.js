@@ -90,16 +90,16 @@ export function verifyReleasePackage(tarball) {
   const packedManifest = JSON.parse(packedManifestText)
 
   assert.equal(packedManifest.name, "@preprocess/sdk")
-  assert.equal(packedManifest.version, "1.0.0")
+  assert.equal(packedManifest.version, "0.0.0")
   assert.equal(packedManifest.license, "UNLICENSED")
-  assert.equal(packedManifest.private, undefined)
+  assert.equal(packedManifest.private, true)
   assert.equal(packedManifest.dependencies, undefined)
   assert.equal(packedManifest.optionalDependencies, undefined)
   assert.equal(packedManifest.peerDependencies, undefined)
   assert.equal(packedManifest.scripts?.preinstall, undefined)
   assert.equal(packedManifest.scripts?.install, undefined)
   assert.equal(packedManifest.scripts?.postinstall, undefined)
-  assert.equal(packedManifest.publishConfig?.access, "public")
+  assert.equal(packedManifest.publishConfig?.access, "restricted")
   assert.equal(
     packedManifest.publishConfig?.registry,
     "https://registry.npmjs.org/",
@@ -142,7 +142,7 @@ assert.deepEqual(Object.keys(sdk).sort(), [
 const process = sdk.defineProcess({
   projectKey: "release-probe",
   name: "Release probe",
-  sdk: "^1.0.0",
+  sdk: "^0.0.0",
 })
 assert.equal(process.kind, "preprocess.process")
 `,
@@ -161,7 +161,7 @@ assert.equal(process.kind, "preprocess.process")
 const process = defineProcess({
   projectKey: "release-probe",
   name: "Release probe",
-  sdk: "^1.0.0",
+  sdk: "^0.0.0",
 })
 const schema = defineSchema({
   orderNumber: s.string(),

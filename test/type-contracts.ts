@@ -74,7 +74,7 @@ createTools(context) satisfies typeof tools | Promise<typeof tools>
 const process = defineProcess({
   projectKey: "fabrication-orders",
   name: "Fabrication order intake",
-  sdk: "^1.0.0",
+  sdk: "^0.0.0",
   entrypoints: ["tools", "schema"],
 })
 
